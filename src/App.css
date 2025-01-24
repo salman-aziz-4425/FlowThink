@@ -23,6 +23,9 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 20;
   overflow: hidden;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
 }
 
 .node.hovered {
@@ -111,6 +114,8 @@
   border-radius: 12px;
   margin-bottom: 16px;
   scrollbar-width: thin;
+  cursor: auto;
+  user-select: text;
 }
 
 .message {
@@ -264,4 +269,15 @@ button:hover {
   background-position: center center;
   z-index: 0;
   pointer-events: none;
+}
+
+.node.jtk-dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  z-index: 1000;
+}
+
+.node input,
+.node button {
+  cursor: auto;
 }

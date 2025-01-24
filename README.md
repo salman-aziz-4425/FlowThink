@@ -1,70 +1,131 @@
-# Getting Started with Create React App
+# Visual Node-Based Chat Interface
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based visual interface that allows users to connect YouTube videos to chat nodes and interact with video content through a conversational interface.
 
-## Available Scripts
+![Flow Diagram](https://github.com/user-attachments/assets/86f2b9b9-f55f-493e-8022-13697fb91d8a)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Visual Node System**: Create and connect different types of nodes through an intuitive drag-and-drop interface.
+- **URL Nodes**: Input YouTube video URLs for processing.
+- **Chat Nodes**: Interact with processed video content through a chat interface.
+- **Real-time Processing**: Visual feedback during video processing and connection states.
+- **Interactive Connections**: Bezier curves with animations and status indicators.
+- **Responsive Design**: Clean, modern UI with smooth animations and transitions.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Getting Started
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Prerequisites
 
-### `npm test`
+- Node.js (v14 or higher)
+- npm or yarn
+- A running backend server (on localhost:8000)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation
 
-### `npm run build`
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Start the development server:
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Usage
 
-### `npm run eject`
+1. **Creating Nodes**:
+   - Double-click anywhere in the workspace to create a URL node.
+   - Alt + Double-click to create a Chat node.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+2. **Connecting Nodes**:
+   - Drag from a URL node's bottom endpoint to a Chat node's top endpoint.
+   - The connection will trigger automatic video processing.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. **Interacting with Nodes**:
+   - URL Node: Enter a YouTube URL.
+   - Chat Node: Ask questions about the video content.
+   - Drag nodes to reposition them in the workspace.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Technical Stack
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Frontend**:
+  - React
+  - jsPlumb (for node connections)
+  - Axios (for API requests)
+  - CSS3 with modern features
 
-## Learn More
+- **Key Dependencies**:
+  - @jsplumb/community
+  - axios
+  - react
+  - react-dom
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Features in Detail
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### URL Node
+- Input field for YouTube URLs.
+- Processing status indicator.
+- Connection endpoint at the bottom.
+- Visual feedback for processing and connection states.
 
-### Code Splitting
+### Chat Node
+- Message history display.
+- User and bot message differentiation.
+- Markdown support for responses.
+- Input field for questions.
+- Loading states for API requests.
+- Connection endpoint at the top.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Connections
+- Animated Bezier curves.
+- Processing state visualization.
+- Connection status indicators.
+- Detachable connections.
 
-### Analyzing the Bundle Size
+## API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The application expects the following endpoints on the backend:
 
-### Making a Progressive Web App
+- `POST /connect-url-to-chat`: Process YouTube URLs
+  ```json
+  {
+    "url": "youtube-url"
+  }
+  ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- `POST /ask-question`: Handle chat interactions
+  ```json
+  {
+    "question": "user-question",
+    "transcript": "video-transcript"
+  }
+  ```
 
-### Advanced Configuration
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
-### Deployment
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### `npm run build` fails to minify
+## Acknowledgments
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- jsPlumb Community Edition for the connection functionality.
+- React team for the amazing framework.
+- All contributors and users of this project.

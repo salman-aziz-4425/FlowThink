@@ -10,7 +10,7 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
   useEffect(() => {
     if (nodeRef.current && jsPlumb) {
       jsPlumb.manage(nodeRef.current);
-      
+
       if (node.type === 'url') {
         jsPlumb.addEndpoint(nodeRef.current, {
           id: id,
@@ -20,12 +20,12 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
           connector: ["Bezier", { curviness: 60 }],
           maxConnections: -1,
           endpoint: ["Dot", { radius: 6 }],
-          paintStyle: { 
+          paintStyle: {
             fill: "#4CAF50",
             stroke: '#fff',
             strokeWidth: 2
           },
-          hoverPaintStyle: { 
+          hoverPaintStyle: {
             fill: "#45a049",
             stroke: '#fff',
             strokeWidth: 3
@@ -42,12 +42,12 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
           isTarget: true,
           maxConnections: -1,
           endpoint: ["Dot", { radius: 6 }],
-          paintStyle: { 
+          paintStyle: {
             fill: "#4CAF50",
             stroke: '#fff',
             strokeWidth: 2
           },
-          hoverPaintStyle: { 
+          hoverPaintStyle: {
             fill: "#45a049",
             stroke: '#fff',
             strokeWidth: 3
@@ -77,9 +77,9 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
     if (!localData.input.trim()) return;
     setLoading(true)
     console.log('transcript', JSON.stringify({
-        question: localData.input,
-        transcript: localStorage.getItem('transcript')
-      }))
+      question: localData.input,
+      transcript: localStorage.getItem('transcript')
+    }))
     try {
       const response = await fetch('http://localhost:8000/ask-question', {
         method: 'POST',
@@ -94,9 +94,9 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
       console.log('data', data)
       setLocalData(prev => ({
         ...prev,
-        messages: [...prev.messages, 
-          { text: localData.input, isUser: true },
-          { text: data.answer, isUser: false }
+        messages: [...prev.messages,
+        { text: localData.input, isUser: true },
+        { text: data.answer, isUser: false }
         ],
         input: ''
       }));
@@ -125,14 +125,14 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
         <div className="url-content">
           <input
             type="text"
-            
+
             placeholder="Enter YouTube URL"
             value={localData.url}
             onChange={(e) => {
               setLocalData({ ...localData, url: e.target.value });
-              setNodes(prev => prev.map(n => 
-                n.id === node.id 
-                  ? { ...n, data: { ...n.data, url: e.target.value }} 
+              setNodes(prev => prev.map(n =>
+                n.id === node.id
+                  ? { ...n, data: { ...n.data, url: e.target.value } }
                   : n
               ));
             }}
@@ -152,7 +152,11 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
                 <span className="message-icon">
                   {msg.isUser ? '👤' : '🤖'}
                 </span>
-                {msg.text}
+                <div className="markdown-content">
+                  {msg.text.split('\n').map((line, index) => (
+                    <p key={index}>{line}</p>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -164,8 +168,16 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
               onChange={(e) => setLocalData({ ...localData, input: e.target.value })}
               onKeyPress={(e) => e.key === 'Enter' && handleQuestionSubmit()}
             />
-            <button onClick={handleQuestionSubmit}>
-              <span className="button-icon">↗️</span>
+            <button 
+              onClick={handleQuestionSubmit}
+              disabled={loading}
+              className={loading ? 'loading' : ''}
+            >
+              {loading ? (
+                <div className="button-spinner"></div>
+              ) : (
+                <span className="button-icon">↗️</span>
+              )}
             </button>
           </div>
         </div>
