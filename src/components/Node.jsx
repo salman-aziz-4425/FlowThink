@@ -1,11 +1,12 @@
+import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 
-const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => {
+const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handleUrlSubmit }) => {
   const nodeRef = useRef(null);
   const [localData, setLocalData] = useState(node.data);
   const [isHovered, setIsHovered] = useState(false);
+  const [loading, setLoading] = useState(false)
 
-  // Initialize jsPlumb for node
   useEffect(() => {
     if (nodeRef.current && jsPlumb) {
       jsPlumb.manage(nodeRef.current);
@@ -58,6 +59,12 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => 
       jsPlumb.setDraggable(nodeRef.current, true);
     }
 
+
+    setLocalData(prev => ({
+      ...prev,
+      messages: []
+    }));
+
     return () => {
       if (jsPlumb && nodeRef.current) {
         jsPlumb.removeAllEndpoints(nodeRef.current);
@@ -68,18 +75,23 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => 
 
   const handleQuestionSubmit = async () => {
     if (!localData.input.trim()) return;
-
+    setLoading(true)
+    console.log('transcript', JSON.stringify({
+        question: localData.input,
+        transcript: localStorage.getItem('transcript')
+      }))
     try {
-      const response = await fetch('/api/ask-question', {
+      const response = await fetch('http://localhost:8000/ask-question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: localData.input,
-          transcript: currentTranscript.current
+          transcript: localStorage.getItem('transcript')
         })
       });
 
       const data = await response.json();
+      console.log('data', data)
       setLocalData(prev => ({
         ...prev,
         messages: [...prev.messages, 
@@ -91,31 +103,7 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => 
     } catch (error) {
       console.error('Error asking question:', error);
     }
-  };
-
-  const handleUrlSubmit = async (url) => {
-    if (!url.trim()) return;
-    
-    setLocalData(prev => ({ ...prev, status: 'processing' }));
-    setNodes(prev => prev.map(n => 
-      n.id === node.id 
-        ? { ...n, data: { ...n.data, status: 'processing' }} 
-        : n
-    ));
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      setLocalData(prev => ({ ...prev, status: 'completed' }));
-      setNodes(prev => prev.map(n => 
-        n.id === node.id 
-          ? { ...n, data: { ...n.data, status: 'completed' }} 
-          : n
-      ));
-    } catch (error) {
-      console.error('Error processing URL:', error);
-      setLocalData(prev => ({ ...prev, status: 'error' }));
-    }
+    setLoading(false)
   };
 
   return (
@@ -137,6 +125,7 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => 
         <div className="url-content">
           <input
             type="text"
+            
             placeholder="Enter YouTube URL"
             value={localData.url}
             onChange={(e) => {
@@ -147,9 +136,8 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript }) => 
                   : n
               ));
             }}
-            onBlur={() => handleUrlSubmit(localData.url)}
           />
-          {localData.status === 'processing' && (
+          {node.data.status === 'processing' && (
             <div className="loading-indicator">
               <div className="loading-spinner"></div>
               <span>Processing video...</span>

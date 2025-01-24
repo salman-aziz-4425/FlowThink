@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { newInstance } from '@jsplumb/community';
 import './App.css';
 import Node from './components/Node';
-
+import axios from 'axios';
 
 function App() {
   const [nodes, setNodes] = useState([]);
@@ -11,9 +11,7 @@ function App() {
   const jsPlumb = useRef(null);
   const currentTranscript = useRef(null);
 
-
   console.log('hello')
-  // Initialize jsPlumb
   useEffect(() => {
     if (workspaceRef.current) {
       jsPlumb.current = newInstance({
@@ -49,15 +47,15 @@ function App() {
       });
 
       jsPlumb.current.bind('connection', (info) => {
-  const sourceEndpointKey = info.source.getAttribute('data-key');
-  const targetEndpointKey = info.target.getAttribute('data-key');
+        const sourceEndpointKey = info.source.getAttribute('data-key');
+        const targetEndpointKey = info.target.getAttribute('data-key');
         const connection = {
           sourceId: sourceEndpointKey,
           targetId: targetEndpointKey
         };
         console.log('connection', connection) 
         
-        setConnections(prev => [...prev, connection]);
+        setConnections([...connections, connection]);
 
         if (info.source.classList.contains('url-node') && 
             info.target.classList.contains('chat-node')) {
@@ -78,9 +76,43 @@ function App() {
     }
   }, []);
 
-  // Create nodes
-  const createNode = (type, position) => {
+  const handleUrlSubmit = async (nodeId, url) => {
+    if (!url.trim()) return;
 
+    console.log('nodeId', nodeId)
+    console.log(nodes)
+    
+    setNodes(prev => prev.map(n => 
+      n.id === nodeId 
+        ? { ...n, data: { ...n.data, status: 'processing' }} 
+        : n
+    ));
+
+    try {
+      const response = await axios.post('http://localhost:8000/connect-url-to-chat', {
+        url: url,
+      });
+      
+      localStorage.setItem('transcript', JSON.stringify(response.data.transcript));
+      setNodes(prev => prev.map(n => 
+        n.id === nodeId 
+          ? { ...n, data: { ...n.data, status: 'completed' }} 
+          : n
+      ));
+      
+      return response.data.transcript;
+    } catch (error) {
+      console.error('Error processing URL:', error);
+      setNodes(prev => prev.map(n => 
+        n.id === nodeId 
+          ? { ...n, data: { ...n.data, status: 'error' }} 
+          : n
+      ));
+      throw error;
+    }
+  };
+
+  const createNode = (type, position) => {
     const node = {
       id: `node-${Date.now()}`,
       type,
@@ -88,13 +120,10 @@ function App() {
       data: type === 'url' ? { url: '' } : { messages: [], input: '' }
     };
     
-    setNodes(prev => [...prev, node]);
+    setNodes([...nodes, node]);
     return node;
   };
-
   
-
-  // Handle workspace double click
   const handleWorkspaceDoubleClick = (e) => {
     const rect = workspaceRef.current.getBoundingClientRect();
     
@@ -106,55 +135,57 @@ function App() {
     createNode(e.altKey ? 'chat' : 'url', position);
   };
 
-
-  // Handle URL to Chat connection
   const handleUrlChatConnection = async (info) => {
-    const sourceNode = nodes.find(n => n.id === info.source.getAttribute('data-key'));
-    const targetNode = nodes.find(n => n.id === info.target.getAttribute('data-key'));
-    if (sourceNode && targetNode) {
-      console.log('sourceNode', sourceNode)
-      console.log('targetNode', targetNode)
-      // Add processing class to the connection
-      info.connection.addClass('processing-connection');
+    console.log('info', info);
 
-      try {
-        // Simulate processing time - replace with actual processing if needed
-        await new Promise(resolve => setTimeout(resolve, 2000));
+    setNodes(prevNodes => {
+      const sourceNode = prevNodes.find(n => String(n.id) === info.source.getAttribute('data-key'));
+      const targetNode = prevNodes.find(n => String(n.id) === info.target.getAttribute('data-key'));
 
-        setNodes(prev => prev.map(node => {
-          if (node.id === targetNode.id) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                connectedUrl: sourceNode.data.url,
-                messages: [
-                  ...node.data.messages,
-                  { 
-                    text: `Connected to video: ${sourceNode.data.url}`, 
-                    isUser: false 
-                  }
-                ]
-              }
-            };
-          }
-          return node;
-        }));
-     
-        info.connection.removeClass('processing-connection');
-        info.connection.addOverlay([
-          'Label', 
-          { 
-            label: 'Connected', 
-            location: 0.5,
-            cssClass: 'connection-label'
-          }
-        ]);
-      } catch (error) {
-        console.error('Error processing connection:', error);
-        info.connection.removeClass('processing-connection');
+      if (sourceNode && targetNode) {
+        console.log('sourceNode', sourceNode);
+        console.log('targetNode', targetNode);
+
+        info.connection.addClass('processing-connection');
+        handleUrlSubmit(info.source.getAttribute('data-key'), sourceNode.data.url).then(() => {
+          return prevNodes.map(node => {
+            if (node.id === targetNode.id) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  connectedUrl: sourceNode.data.url,
+                  messages: [
+                    ...node.data.messages,
+                    { 
+                      text: `Connected to video: ${sourceNode.data.url}`, 
+                      isUser: false 
+                    }
+                  ]
+                }
+              };
+            }
+            if (node.id === sourceNode.id) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  status: 'completed'
+                }
+              };
+            }
+            return node;
+          });
+        }).then(updatedNodes => {
+          setNodes(updatedNodes);
+          info.connection.removeClass('processing-connection');
+        }).catch(error => {
+          console.error('Error processing connection:', error);
+          info.connection.removeClass('processing-connection');
+        });
       }
-    }
+      return prevNodes; 
+    });
   };
 
   return (
@@ -171,6 +202,7 @@ function App() {
             jsPlumb={jsPlumb.current}
             setNodes={setNodes}
             currentTranscript={currentTranscript}
+            handleUrlSubmit={handleUrlSubmit}
           />
         ))}
       </div>
