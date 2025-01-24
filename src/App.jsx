@@ -49,8 +49,8 @@ function App() {
       });
 
       jsPlumb.current.bind('connection', (info) => {
-        const sourceEndpointKey = info.source.getAttribute('data-key');
-        const targetEndpointKey = info.target.getAttribute('data-key');
+  const sourceEndpointKey = info.source.getAttribute('data-key');
+  const targetEndpointKey = info.target.getAttribute('data-key');
         const connection = {
           sourceId: sourceEndpointKey,
           targetId: targetEndpointKey
@@ -80,6 +80,7 @@ function App() {
 
   // Create nodes
   const createNode = (type, position) => {
+
     const node = {
       id: `node-${Date.now()}`,
       type,
@@ -90,6 +91,8 @@ function App() {
     setNodes(prev => [...prev, node]);
     return node;
   };
+
+  
 
   // Handle workspace double click
   const handleWorkspaceDoubleClick = (e) => {
@@ -103,12 +106,14 @@ function App() {
     createNode(e.altKey ? 'chat' : 'url', position);
   };
 
+
   // Handle URL to Chat connection
   const handleUrlChatConnection = async (info) => {
     const sourceNode = nodes.find(n => n.id === info.source.getAttribute('data-key'));
     const targetNode = nodes.find(n => n.id === info.target.getAttribute('data-key'));
-    
     if (sourceNode && targetNode) {
+      console.log('sourceNode', sourceNode)
+      console.log('targetNode', targetNode)
       // Add processing class to the connection
       info.connection.addClass('processing-connection');
 
@@ -153,23 +158,23 @@ function App() {
   };
 
   return (
-    <div 
-      className="workspace" 
-      ref={workspaceRef}
-      onDoubleClick={handleWorkspaceDoubleClick}
-    >
-      {nodes.map(node => (
-        <Node
-          key={node.id}
-          id={node.id}
-          node={node}
-          jsPlumb={jsPlumb.current}
-          setNodes={setNodes}
-          currentTranscript={currentTranscript}
-        />
-      ))}
-    </div>
+      <div 
+        className="workspace" 
+        ref={workspaceRef}
+        onDoubleClick={handleWorkspaceDoubleClick}
+      >
+        {nodes.map(node => (
+          <Node
+            key={node.id}
+            id={node.id}
+            node={node}
+            jsPlumb={jsPlumb.current}
+            setNodes={setNodes}
+            currentTranscript={currentTranscript}
+          />
+        ))}
+      </div>
   );
 }
 
-export default App; 
+export default App;
