@@ -2,37 +2,225 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.list {
+  padding: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.row {
+  border-bottom: 1px solid #ebeced;
+  text-align: left;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.image {
+  margin-right: 10px;
+}
+
+.content {
+  padding: 10px;
+}
+
+.node {
+  position: absolute;
+  min-width: 200px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 20;
+}
+
+.node.connected {
+  border-color: #4CAF50;
+  box-shadow: 0 0 10px rgba(76,175,80,0.3);
+}
+
+.url-box input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.chat-box input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+}
+
+.status {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.jtk-connector {
+  z-index: 9;
+}
+
+#urlBox {
+  background-color: #e0f7fa; /* Light blue for URL box */
+}
+
+#chatBox {
+  background-color: #ffe0b2; /* Light orange for chat box */
+}
+
+.workspace {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: #f5f5f5;
+}
+
+.url-content, .chat-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.chat-messages {
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-@keyframes App-logo-spin {
+.message {
+  margin: 5px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.message.user {
+  background: #e3f2fd;
+  margin-left: 20px;
+}
+
+.message.bot {
+  background: #f5f5f5;
+  margin-right: 20px;
+}
+
+/* Add these to your existing CSS */
+.connection-label {
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #4CAF50;
+}
+
+.node.connected {
+  border: 2px solid #4CAF50;
+}
+
+/* Endpoint styles */
+.jtk-endpoint {
+  z-index: 11;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.jtk-endpoint:hover {
+  transform: scale(1.2);
+}
+
+/* Connection animation */
+.jtk-connector path {
+  stroke-dasharray: none;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.jtk-connector:hover path {
+  stroke-dasharray: 7 3;
+  animation: flowLine 0.5s linear infinite;
+}
+
+@keyframes flowLine {
   from {
-    transform: rotate(0deg);
+    stroke-dashoffset: 10;
   }
   to {
-    transform: rotate(360deg);
+    stroke-dashoffset: 0;
   }
+}
+
+/* Add or update these styles */
+.connection-line {
+  z-index: 10;
+}
+
+/* Visual feedback for potential connections */
+.jtk-drag-select * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jtk-drag-hover {
+  border: 2px solid #4CAF50 !important;
+}
+
+@keyframes processing {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.processing-animation {
+  animation: processing 1s infinite;
+  display: inline-block;
+  font-size: 14px;
+  color: #4CAF50;
+}
+
+/* Connection line animation */
+.connection-line.processing {
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 10;
+  }
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4CAF50;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes processingLine {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.processing-connection {
+  stroke-dasharray: 8 4;
+  animation: processingLine 0.5s linear infinite;
 }
