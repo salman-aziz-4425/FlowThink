@@ -113,7 +113,8 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
       className={`node ${node.type}-node ${node.data.connectedUrl ? 'connected' : ''} ${isHovered ? 'hovered' : ''}`}
       style={{
         left: node.position.x,
-        top: node.position.y
+        top: node.position.y,
+        width: '400px'
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

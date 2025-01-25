@@ -11,7 +11,6 @@ function App() {
   const jsPlumb = useRef(null);
   const currentTranscript = useRef(null);
 
-  console.log('hello')
   useEffect(() => {
     if (workspaceRef.current) {
       jsPlumb.current = newInstance({
@@ -189,23 +188,28 @@ function App() {
   };
 
   return (
-      <div 
-        className="workspace" 
-        ref={workspaceRef}
-        onDoubleClick={handleWorkspaceDoubleClick}
-      >
-        {nodes.map(node => (
-          <Node
-            key={node.id}
-            id={node.id}
-            node={node}
-            jsPlumb={jsPlumb.current}
-            setNodes={setNodes}
-            currentTranscript={currentTranscript}
-            handleUrlSubmit={handleUrlSubmit}
-          />
-        ))}
+    <div 
+      className="workspace" 
+      ref={workspaceRef}
+      onDoubleClick={handleWorkspaceDoubleClick}
+    >
+      <div className="workspace-instructions">
+        Double-click to create URL node<br/>
+        Alt + Double-click to create Chat node<br/>
+        Connect nodes to start chatting
       </div>
+      {nodes.map(node => (
+        <Node
+          key={node.id}
+          id={node.id}
+          node={node}
+          jsPlumb={jsPlumb.current}
+          setNodes={setNodes}
+          currentTranscript={currentTranscript}
+          handleUrlSubmit={handleUrlSubmit}
+        />
+      ))}
+    </div>
   );
 }
 
