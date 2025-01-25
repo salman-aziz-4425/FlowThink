@@ -1,8 +1,8 @@
-# Visual Node-Based Chat Interface
+# Flow Think
 
 A React-based visual interface that allows users to connect YouTube videos to chat nodes and interact with video content through a conversational interface.
 
-![Flow Diagram](https://github.com/user-attachments/assets/86f2b9b9-f55f-493e-8022-13697fb91d8a)
+<img width="1512" alt="image" src="https://github.com/user-attachments/assets/079f669f-333d-4516-8587-6397e3dc5bc7" />
 
 ## Features
 
@@ -108,7 +108,6 @@ The application expects the following endpoints on the backend:
   ```json
   {
     "question": "user-question",
-    "transcript": "video-transcript"
   }
   ```
 
