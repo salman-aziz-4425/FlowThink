@@ -78,7 +78,6 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
     setLoading(true)
     console.log('transcript', JSON.stringify({
       question: localData.input,
-      transcript: localStorage.getItem('transcript')
     }))
     try {
       const response = await fetch('http://localhost:8000/ask-question', {
@@ -86,7 +85,6 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: localData.input,
-          transcript: localStorage.getItem('transcript')
         })
       });
 

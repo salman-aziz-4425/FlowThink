@@ -92,7 +92,6 @@ function App() {
         url: url,
       });
       
-      localStorage.setItem('transcript', JSON.stringify(response.data.transcript));
       setNodes(prev => prev.map(n => 
         n.id === nodeId 
           ? { ...n, data: { ...n.data, status: 'completed' }} 

@@ -163,14 +163,14 @@
 }
 
 .url-content {
-  width: 30vw;
+  width: 40px;
   height: 100px;
   padding: 12px;
   padding-right: 50px;
 }
 
 input[type="text"] {
-  width: 20vw;
+  width: 300px;
   border-radius: 12px;
   padding: 12px;
   border: 1px solid rgba(0,0,0,0.1);
