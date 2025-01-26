@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 
-const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handleUrlSubmit }) => {
+const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript, handleUrlSubmit }) => {
   const nodeRef = useRef(null);
   const [localData, setLocalData] = useState(node.data);
   const [isHovered, setIsHovered] = useState(false);
@@ -59,7 +59,7 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
       jsPlumb.setDraggable(nodeRef.current, true);
     }
 
-
+    console.log('node', node)
     setLocalData(prev => ({
       ...prev,
       messages: []
@@ -80,10 +80,12 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
       question: localData.input,
     }))
     try {
+      const sourceNode = nodes.find(n => n.id === node.data.sourceNodeId)
       const response = await fetch('http://localhost:8000/ask-question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          url: sourceNode.data.url,
           question: localData.input,
         })
       });
@@ -151,9 +153,11 @@ const Node = React.memo(({ node, jsPlumb, id, setNodes, currentTranscript, handl
                 <span className="message-icon">
                   {msg.isUser ? '👤' : '🤖'}
                 </span>
-                <div className="markdown-content">
+                <div>
                   {msg.text.split('\n').map((line, index) => (
-                    <p key={index}>{line}</p>
+                    <p style={{
+                      textAlign: msg.isUser ? 'right' : 'left'
+                    }} key={index}>{line}</p>
                   ))}
                 </div>
               </div>

@@ -94,9 +94,10 @@ function App() {
       
       setNodes(prev => prev.map(n => 
         n.id === nodeId 
-          ? { ...n, data: { ...n.data, status: 'completed' }} 
+          ? { ...n, data: { ...n.data, status: 'completed', url: url }} 
           : n
       ));
+    
       
       return response.data.transcript;
     } catch (error) {
@@ -153,6 +154,7 @@ function App() {
                 data: {
                   ...node.data,
                   connectedUrl: sourceNode.data.url,
+                  sourceNodeId: sourceNode.id,
                   messages: [
                     ...node.data.messages,
                     { 
@@ -168,7 +170,8 @@ function App() {
                 ...node,
                 data: {
                   ...node.data,
-                  status: 'completed'
+                  status: 'completed',
+                  url: sourceNode.data.url
                 }
               };
             }
@@ -182,6 +185,7 @@ function App() {
           info.connection.removeClass('processing-connection');
         });
       }
+      
       return prevNodes; 
     });
   };
@@ -201,6 +205,7 @@ function App() {
         <Node
           key={node.id}
           id={node.id}
+          nodes={nodes}
           node={node}
           jsPlumb={jsPlumb.current}
           setNodes={setNodes}
