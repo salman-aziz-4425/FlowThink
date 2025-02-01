@@ -151,11 +151,16 @@
   height: 40px;
   padding: 8px;
   margin-top: 0;
+  transition: all 0.3s ease;
 }
 
-.chat-input-container button.loading {
-  background: #45a049;
+.chat-input-container button:disabled {
   cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.chat-input-container button.loading:disabled {
+  background: #45a049;
 }
 
 .button-icon {
@@ -317,7 +322,48 @@ button:hover {
   line-height: 2;
   letter-spacing: 1px;
   text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
+
+.instruction-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.instruction-icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.instruction-step:nth-child(1) { animation-delay: 0.2s; }
+.instruction-step:nth-child(2) { animation-delay: 0.4s; }
+.instruction-step:nth-child(3) { animation-delay: 0.6s; }
 
 .message.user {
   margin-left: auto;
@@ -330,4 +376,28 @@ button:hover {
   margin-right: auto;
   background-color: #f5f5f5;
   border-bottom-left-radius: 4px;
+}
+
+.chat-input-container input.disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  color: #999;
+  border-color: #ddd;
+}
+
+.chat-input-container input:disabled::placeholder {
+  color: #999;
+}
+
+.chat-input-container button.disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.chat-input-container button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background-color: #cccccc;
 }

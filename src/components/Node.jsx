@@ -166,15 +166,17 @@ const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript,
           <div className="chat-input-container">
             <input
               type="text"
-              placeholder="Ask about video..."
+              placeholder={!node.data.sourceNodeId ? "Connect to a URL node first..." : "Ask about video..."}
               value={localData.input}
               onChange={(e) => setLocalData({ ...localData, input: e.target.value })}
-              onKeyPress={(e) => e.key === 'Enter' && handleQuestionSubmit()}
+              onKeyPress={(e) => e.key === 'Enter' && !loading && node.data.sourceNodeId && handleQuestionSubmit()}
+              disabled={loading || !node.data.sourceNodeId}
+              className={!node.data.sourceNodeId ? 'disabled' : ''}
             />
             <button 
               onClick={handleQuestionSubmit}
-              disabled={loading}
-              className={loading ? 'loading' : ''}
+              disabled={loading || !node.data.sourceNodeId}
+              className={`${loading ? 'loading' : ''} ${!node.data.sourceNodeId ? 'disabled' : ''}`}
             >
               {loading ? (
                 <div className="button-spinner"></div>

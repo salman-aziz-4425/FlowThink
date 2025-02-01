@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { newInstance } from '@jsplumb/community';
+import {
+  BrowserRouter,
+  Routes,
+  Route
+} from 'react-router-dom';
+import LandingPage from './components/LandingPage';
+import Workspace from './components/Workspace';
 import './App.css';
+import './styles/LandingPage.css';
 import Node from './components/Node';
+import SEOMetaTags from './components/SEOMetaTags';
 import axios from 'axios';
 
 function App() {
@@ -191,29 +200,50 @@ function App() {
   };
 
   return (
-    <div 
-      className="workspace" 
-      ref={workspaceRef}
-      onDoubleClick={handleWorkspaceDoubleClick}
-    >
-      <div className="workspace-instructions">
-        Double-click to create URL node<br/>
-        Alt + Double-click to create Chat node<br/>
-        Connect nodes to start chatting
-      </div>
-      {nodes.map(node => (
-        <Node
-          key={node.id}
-          id={node.id}
-          nodes={nodes}
-          node={node}
-          jsPlumb={jsPlumb.current}
-          setNodes={setNodes}
-          currentTranscript={currentTranscript}
-          handleUrlSubmit={handleUrlSubmit}
-        />
-      ))}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/workspace" element={
+          <>
+            <SEOMetaTags />
+            <div 
+              className="workspace" 
+              ref={workspaceRef}
+              onDoubleClick={handleWorkspaceDoubleClick}
+            >
+              {nodes.length === 0 && (
+                <div className="workspace-instructions">
+                  <div className="instruction-step">
+                    <span className="instruction-icon">🎯</span>
+                    <span>Double-click to create URL node</span>
+                  </div>
+                  <div className="instruction-step">
+                    <span className="instruction-icon">⌥</span>
+                    <span>Alt + Double-click to create Chat node</span>
+                  </div>
+                  <div className="instruction-step">
+                    <span className="instruction-icon">🔗</span>
+                    <span>Connect nodes to start chatting</span>
+                  </div>
+                </div>
+              )}
+              {nodes.map(node => (
+                <Node
+                  key={node.id}
+                  id={node.id}
+                  nodes={nodes}
+                  node={node}
+                  jsPlumb={jsPlumb.current}
+                  setNodes={setNodes}
+                  currentTranscript={currentTranscript}
+                  handleUrlSubmit={handleUrlSubmit}
+                />
+              ))}
+            </div>
+          </>
+        } />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
