@@ -1,20 +1,27 @@
 import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 
-const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript, handleUrlSubmit }) => {
+const Node = React.memo(({ node, jsPlumb, id, nodes, setNodes, currentTranscript, handleUrlSubmit }) => {
   const nodeRef = useRef(null);
   const [localData, setLocalData] = useState(node.data);
   const [isHovered, setIsHovered] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    if (nodeRef.current && jsPlumb) {
+  // Initialize jsPlumb endpoints
+  const initializeEndpoints = () => {
+    if (nodeRef.current && jsPlumb && !isInitialized) {
+      jsPlumb.removeAllEndpoints(nodeRef.current);
       jsPlumb.manage(nodeRef.current);
 
       if (node.type === 'url') {
-        jsPlumb.addEndpoint(nodeRef.current, {
-          id: id,
-          anchor: "Bottom",
+        const endpoint = jsPlumb.addEndpoint(nodeRef.current, {
+          id: `${id}-endpoint`,
+          anchor: ["Bottom", {
+            x: 0.5,
+            y: 1,
+            orientation: [0, 1]
+          }],
           isSource: true,
           isTarget: false,
           connector: ["Bezier", { curviness: 60 }],
@@ -22,21 +29,27 @@ const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript,
           endpoint: ["Dot", { radius: 6 }],
           paintStyle: {
             fill: "#4CAF50",
-            stroke: '#fff',
-            strokeWidth: 2
+            stroke: '#ffffff',
+            strokeWidth: 2,
+            radius: 6
           },
           hoverPaintStyle: {
             fill: "#45a049",
-            stroke: '#fff',
+            stroke: '#ffffff',
             strokeWidth: 3
           },
-          data: id
+          data: id,
+          visible: true
         });
+
+        if (endpoint) {
+          endpoint.setVisible(true, true);
+        }
       }
 
       if (node.type === 'chat') {
-        jsPlumb.addEndpoint(nodeRef.current, {
-          id: id,
+        const endpoint = jsPlumb.addEndpoint(nodeRef.current, {
+          id: `${id}-endpoint`,
           anchor: "Top",
           isSource: false,
           isTarget: true,
@@ -44,34 +57,94 @@ const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript,
           endpoint: ["Dot", { radius: 6 }],
           paintStyle: {
             fill: "#4CAF50",
-            stroke: '#fff',
+            stroke: '#ffffff',
             strokeWidth: 2
           },
           hoverPaintStyle: {
             fill: "#45a049",
-            stroke: '#fff',
+            stroke: '#ffffff',
             strokeWidth: 3
           },
           data: id
         });
       }
 
-      jsPlumb.setDraggable(nodeRef.current, true);
-    }
+      // Add connection listener
+      jsPlumb.bind("connection", (info) => {
+        const sourceId = info.sourceId;
+        const targetId = info.targetId;
+        
+        // Find the URL node
+        const urlNode = nodes.find(n => n.id === sourceId);
+        if (urlNode && urlNode.data.url) {
+          // Update the chat node with the source node ID
+          setNodes(prevNodes => prevNodes.map(n => 
+            n.id === targetId 
+              ? { ...n, data: { ...n.data, sourceNodeId: sourceId } }
+              : n
+          ));
 
-    console.log('node', node)
-    setLocalData(prev => ({
-      ...prev,
-      messages: []
-    }));
+          // Make the API request
+          fetch('http://localhost:8000/process-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: urlNode.data.url })
+          });
+        }
+      });
+
+      jsPlumb.setDraggable(nodeRef.current, true);
+      jsPlumb.repaintEverything();
+      setIsInitialized(true);
+    }
+  };
+
+  // Main initialization effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (jsPlumb) {
+        initializeEndpoints();
+      }
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (jsPlumb && nodeRef.current) {
         jsPlumb.removeAllEndpoints(nodeRef.current);
         jsPlumb.unmanage(nodeRef.current);
       }
     };
-  }, [jsPlumb, node.type, id]);
+  }, [jsPlumb]);
+
+  // Repaint effect
+  useEffect(() => {
+    if (jsPlumb && isInitialized) {
+      const repaintTimer = setInterval(() => {
+        if (nodeRef.current) {
+          jsPlumb.revalidate(nodeRef.current);
+          jsPlumb.repaintEverything();
+        }
+      }, 250);
+
+      return () => clearInterval(repaintTimer);
+    }
+  }, [jsPlumb, isInitialized]);
+
+  // Force repaint when nodes change
+  useEffect(() => {
+    if (jsPlumb && isInitialized && nodeRef.current) {
+      jsPlumb.revalidate(nodeRef.current);
+      jsPlumb.repaintEverything();
+    }
+  }, [nodes]);
+
+  // Reset messages when node is created
+  useEffect(() => {
+    setLocalData(prev => ({
+      ...prev,
+      messages: []
+    }));
+  }, []);
 
   const handleQuestionSubmit = async () => {
     if (!localData.input.trim()) return;
@@ -106,6 +179,28 @@ const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript,
     setLoading(false)
   };
 
+  const handleDelete = () => {
+    if (jsPlumb && nodeRef.current) {
+      // Get all connections for this node
+      const connections = jsPlumb.getAllConnections().filter(conn => 
+        conn.source.getAttribute('data-key') === id || 
+        conn.target.getAttribute('data-key') === id
+      );
+      
+      // Delete all connections
+      connections.forEach(conn => {
+        jsPlumb.deleteConnection(conn);
+      });
+
+      // Remove all endpoints
+      jsPlumb.removeAllEndpoints(nodeRef.current);
+      jsPlumb.unmanage(nodeRef.current);
+
+      // Remove node from state
+      setNodes(prevNodes => prevNodes.filter(n => n.id !== id));
+    }
+  };
+
   return (
     <div
       ref={nodeRef}
@@ -120,7 +215,14 @@ const Node = React.memo(({ node, jsPlumb, id,nodes, setNodes, currentTranscript,
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="node-header">
-        {node.type === 'url' ? '🔗 URL Node' : '💬 Chat Node'}
+        <span>{node.type === 'url' ? '🔗 URL Node' : '💬 Chat Node'}</span>
+        <button 
+          className="delete-node" 
+          onClick={handleDelete}
+          title="Delete node"
+        >
+          ×
+        </button>
       </div>
       {node.type === 'url' ? (
         <div className="url-content">

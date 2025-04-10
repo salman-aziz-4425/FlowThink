@@ -19,6 +19,9 @@ function App() {
   const workspaceRef = useRef(null);
   const jsPlumb = useRef(null);
   const currentTranscript = useRef(null);
+  const [isPanning, setIsPanning] = useState(false);
+  const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+  const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (workspaceRef.current) {
@@ -199,6 +202,29 @@ function App() {
     });
   };
 
+  // Handle workspace panning
+  const handleMouseDown = (e) => {
+    if (e.target === workspaceRef.current) {
+      setIsPanning(true);
+      setStartPan({
+        x: e.clientX + workspaceRef.current.parentElement.scrollLeft,
+        y: e.clientY + workspaceRef.current.parentElement.scrollTop
+      });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isPanning) {
+      const container = workspaceRef.current.parentElement;
+      container.scrollLeft = startPan.x - e.clientX;
+      container.scrollTop = startPan.y - e.clientY;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -207,38 +233,46 @@ function App() {
           <>
             <SEOMetaTags />
             <div 
-              className="workspace" 
-              ref={workspaceRef}
-              onDoubleClick={handleWorkspaceDoubleClick}
+              className="workspace-container"
             >
-              {nodes.length === 0 && (
-                <div className="workspace-instructions">
-                  <div className="instruction-step">
-                    <span className="instruction-icon">🎯</span>
-                    <span>Double-click to create URL node</span>
+              <div
+                ref={workspaceRef}
+                className="workspace"
+                onDoubleClick={handleWorkspaceDoubleClick}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                {nodes.length === 0 && (
+                  <div className="workspace-instructions">
+                    <div className="instruction-step">
+                      <span className="instruction-icon">🎯</span>
+                      <span>Double-click to create URL node</span>
+                    </div>
+                    <div className="instruction-step">
+                      <span className="instruction-icon">⌥</span>
+                      <span>Alt + Double-click to create Chat node</span>
+                    </div>
+                    <div className="instruction-step">
+                      <span className="instruction-icon">🔗</span>
+                      <span>Connect nodes to start chatting</span>
+                    </div>
                   </div>
-                  <div className="instruction-step">
-                    <span className="instruction-icon">⌥</span>
-                    <span>Alt + Double-click to create Chat node</span>
-                  </div>
-                  <div className="instruction-step">
-                    <span className="instruction-icon">🔗</span>
-                    <span>Connect nodes to start chatting</span>
-                  </div>
-                </div>
-              )}
-              {nodes.map(node => (
-                <Node
-                  key={node.id}
-                  id={node.id}
-                  nodes={nodes}
-                  node={node}
-                  jsPlumb={jsPlumb.current}
-                  setNodes={setNodes}
-                  currentTranscript={currentTranscript}
-                  handleUrlSubmit={handleUrlSubmit}
-                />
-              ))}
+                )}
+                {nodes.map(node => (
+                  <Node
+                    key={node.id}
+                    id={node.id}
+                    nodes={nodes}
+                    node={node}
+                    jsPlumb={jsPlumb.current}
+                    setNodes={setNodes}
+                    currentTranscript={currentTranscript}
+                    handleUrlSubmit={handleUrlSubmit}
+                  />
+                ))}
+              </div>
             </div>
           </>
         } />
